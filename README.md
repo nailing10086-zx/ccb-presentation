@@ -9,6 +9,28 @@
 - **驾驶舱模式** — 三轴筛选（时间/部门/业务）、KPI 卡片、ECharts 图表四视图（趋势/双期/排名/诊断）、经营诊断侧边栏、行动看板
 - **汇报模式** — 全屏幻灯片，按「现状→问题→原因→措施」四层结构展开
 
+## 所需技能（Reasonix Skills）
+
+| 技能 | 用途 |
+|------|------|
+| `ccb-presentation` | 本技能，制作驾驶舱 + 汇报 HTML |
+| `push-skills` | 推送技能更新到 Gitee/GitHub |
+
+## 所需 MCP
+
+| MCP | 用途 |
+|-----|------|
+| `firecrawl-mcp` | `firecrawl_parse` 解析 xlsx/docx 数据源 |
+| `luma-mcp` | `image_understand` 看图识别截图/报错 |
+
+## 所需本地工具
+
+| 工具 | 用途 |
+|------|------|
+| Node.js + `xlsx` + `mammoth` | 解析 Excel/Word 数据源 |
+| Git | 推送到 Gitee + GitHub |
+| ECharts 5.5+ (CDN) | 运行时图表渲染 |
+
 ## 交互流程
 
 ```
