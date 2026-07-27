@@ -15,12 +15,24 @@
 |------|------|
 | `ccb-presentation` | 本技能，制作驾驶舱 + 汇报 HTML |
 | `push-skills` | 推送技能更新到 Gitee/GitHub |
+| `dashi-ppt` | PPT 演示文稿制作参考 |
+| `ppt-master` | PPT 工作流参考 |
+| `guizang-ppt-skill` | 网页 PPT 生成参考 |
+| `frontend-slides` | 动画 HTML 演示参考 |
+| `paper-spine` / `paperspine` | 论文/报告写作参考 |
+| `academic-paper` | 学术论文全流程参考 |
+| `deep-research` | 深度调研参考 |
+| `humanizer-zh` / `remove-ai-flavor` / `deslop` / `avoid-ai-writing` | AI 文本润色去痕迹 |
+| `forkprobe` | 技能/方案对比推荐 |
+| `init` | 项目初始化 |
+| `install-capability` | 安装 MCP/技能 |
+| `reasonix-guide` | Reasonix 配置排障 |
 
 ## 所需 MCP
 
 | MCP | 用途 |
 |-----|------|
-| `firecrawl-mcp` | `firecrawl_parse` 解析 xlsx/docx 数据源 |
+| `firecrawl-mcp` | `firecrawl_parse` 解析 xlsx/docx 数据源；`firecrawl_search` 网络搜索；`firecrawl_scrape` 网页抓取 |
 | `luma-mcp` | `image_understand` 看图识别截图/报错 |
 
 ## 所需本地工具
@@ -64,6 +76,21 @@
 - 纯 CSS 变量白蓝建行色系
 - 响应式断点（480px ~ 1920px）
 
+## 致谢
+
+感谢 Reasonix 生态提供的技能和 MCP 支持：
+
+
+**技能**：`dashi-ppt` · `ppt-master` · `guizang-ppt-skill` · `frontend-slides` · `push-skills` · `reasonix-guide` · `install-capability` · `init` · `review` · `security-review` · `explore` · `research` · `test` · `humanizer-zh` · `remove-ai-flavor` · `deslop` · `avoid-ai-writing` · `paper-spine` · `paperspine` · `academic-paper` · `deep-research` · `forkprobe`
+
+
+**MCP**：`firecrawl-mcp`（数据解析/搜索/抓取）· `luma-mcp`（图像理解）
+
+
+感谢开源生态：ECharts · xlsx · mammoth · Node.js · Git。
+
+
 ## License
+
 
 MIT
