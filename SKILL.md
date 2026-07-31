@@ -328,36 +328,33 @@
 
 从南孚国际官网逆向学到的"炫酷"滚动叙事手法，适用于领导汇报的"数据气势"页。
 
-### 1. 超大数字滚动叙事（核心炫酷点）
+### 1. 超大数字滚动叙事（Swiper 横向整屏翻页，非数字滑入）
 
-真站 +345% 页：大数字 `f-300`（300px 金色渐变），滚动时**从右往左滑入**（实测 x: 306→154px），不是淡入。
+真站 +345% 页实测：3 个 Reasons（+345% / 31 years / No.1）是 **Swiper 横向 3 屏滑块**（DOM：tabParent tab-1/2/3 + tabBox swiper-wrapper），滚动时**整屏从右往左翻页**，每屏含超大数字 + 照片 + 穿梭电池。不是数字单独滑入！
 
-实现（CSS + JS）：
+实现（滚动驱动整屏横向平移，仿 Swiper）：
 ```css
-.big-row{position:relative;min-height:300vh}          /* 3屏滚动空间 */
-.big-item{position:sticky;top:0;height:100vh;...}      /* 每个数字 sticky 占1屏 */
-.big-item .bn{font-size:clamp(90px,18vw,300px);font-weight:800;
-  background:linear-gradient(...);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  will-change:transform,opacity;transform:translateX(260px);opacity:0}  /* 初始在右侧外 */
+.reasons-scene{position:relative;height:300vh}          /* 3屏滚动空间 */
+.reasons-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center}
+.reasons{width:300%;display:flex;will-change:transform}  /* 3屏横向排列 */
+.reason{width:33.333%;height:100vh;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:0 8vw;position:relative}
+.reason .rn{font-size:clamp(80px,16vw,280px);font-weight:800;
+  background:linear-gradient(135deg,主色,亮色);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* 每屏右侧照片占位 */
+.reason .imgbox{position:absolute;right:-4vw;top:50%;width:clamp(200px,26vw,420px);transform:translateY(-50%)}
 ```
 ```js
-function bigUpdate(){
-  var rect = bigSec.getBoundingClientRect();
-  var total = bigSec.offsetHeight - window.innerHeight;
-  var p = Math.min(Math.max(-rect.top / total, 0), 1);   /* 区域滚动进度 0~1 */
-  bnEls.forEach(function(bn, i){
-    var seg = p * 3 - i;                                  /* 每个数字在各自 1/3 区间 */
-    var sp = Math.min(Math.max(seg, 0), 1);
-    bn.style.transform = 'translateX(' + (260 * (1 - sp)) + 'px)';  /* 右→左 */
-    bn.style.opacity = sp > 0 ? 1 : 0;
-    /* 副标题/描述错峰出现 */
-    btEls[i].style.opacity = sp > .4 ? 1 : 0;
-    bdEls[i].style.opacity = sp > .5 ? 1 : 0;
-  });
+function reasonsUpdate(){
+  var rect = reasonsSec.getBoundingClientRect();
+  var total = reasonsSec.offsetHeight - window.innerHeight;
+  var p = Math.min(Math.max(-rect.top / total, 0), 1);
+  var maxShift = reasonsTrack.scrollWidth - window.innerWidth;
+  reasonsTrack.style.transform = 'translateX(' + (-p * maxShift) + 'px)';  /* 整屏右→左翻页 */
 }
-window.addEventListener('scroll', bigUpdate);
+window.addEventListener('scroll', reasonsUpdate);
 ```
 
+**核心区别**：是横向排列的整屏容器整体平移（像 Swiper/轮播翻页），不是单个数字/元素各自滑入。检测真站是否用此法：查 DOM 是否有 swiper-wrapper / tabParent tab-N / 多个等高 col 横向排列 + width:300% 容器。
 ### 2. 穿梭元素（setImg 同款：旋转 + 弧线移动）
 
 真站电池图随滚动 `rotate(0→540°) + translateX(右→左) + sin 弧线`：
