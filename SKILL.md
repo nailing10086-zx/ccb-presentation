@@ -323,3 +323,77 @@
 - 每个动画场景必须包含可读的管理解释，仅图表的场景对领导层不完整
 - 开场动效使用已有品牌资产，不发明或重绘
 - 动画重写后测试：开场 → Hero 变形 → 主体扫光 → 深处滚动 → 反向滚动 → 窄视口
+
+## 高级滚动动效（nanfu.global 逆向实战总结）
+
+从南孚国际官网逆向学到的"炫酷"滚动叙事手法，适用于领导汇报的"数据气势"页。
+
+### 1. 超大数字滚动叙事（核心炫酷点）
+
+真站 +345% 页：大数字 `f-300`（300px 金色渐变），滚动时**从右往左滑入**（实测 x: 306→154px），不是淡入。
+
+实现（CSS + JS）：
+```css
+.big-row{position:relative;min-height:300vh}          /* 3屏滚动空间 */
+.big-item{position:sticky;top:0;height:100vh;...}      /* 每个数字 sticky 占1屏 */
+.big-item .bn{font-size:clamp(90px,18vw,300px);font-weight:800;
+  background:linear-gradient(...);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  will-change:transform,opacity;transform:translateX(260px);opacity:0}  /* 初始在右侧外 */
+```
+```js
+function bigUpdate(){
+  var rect = bigSec.getBoundingClientRect();
+  var total = bigSec.offsetHeight - window.innerHeight;
+  var p = Math.min(Math.max(-rect.top / total, 0), 1);   /* 区域滚动进度 0~1 */
+  bnEls.forEach(function(bn, i){
+    var seg = p * 3 - i;                                  /* 每个数字在各自 1/3 区间 */
+    var sp = Math.min(Math.max(seg, 0), 1);
+    bn.style.transform = 'translateX(' + (260 * (1 - sp)) + 'px)';  /* 右→左 */
+    bn.style.opacity = sp > 0 ? 1 : 0;
+    /* 副标题/描述错峰出现 */
+    btEls[i].style.opacity = sp > .4 ? 1 : 0;
+    bdEls[i].style.opacity = sp > .5 ? 1 : 0;
+  });
+}
+window.addEventListener('scroll', bigUpdate);
+```
+
+### 2. 穿梭元素（setImg 同款：旋转 + 弧线移动）
+
+真站电池图随滚动 `rotate(0→540°) + translateX(右→左) + sin 弧线`：
+
+```js
+flt.style.transform = 'translateX(' + (20 - sp * 70) + 'vw) translateY(' +
+  (Math.sin(sp * Math.PI) * 30) + 'px) rotate(' + (sp * 540 - 30) + 'deg)';
+```
+
+CSS 穿梭环（银行版用蓝色能量环替代电池）：
+```css
+.flt{position:absolute;right:-8vw;top:50%;will-change:transform;opacity:0}
+.flt-ring{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid rgba(主色,.5);
+  box-shadow:0 0 40px rgba(主色,.2),inset 0 0 40px rgba(主色,.1)}
+.flt-ring::before{content:'';position:absolute;inset:18%;border-radius:50%;border:1px dashed rgba(主色,.35)}
+.flt-ring::after{content:'';position:absolute;inset:34%;border-radius:50%;background:radial-gradient(circle,rgba(主色,.3),transparent 70%)}
+```
+
+### 3. 关键实现要点
+
+- **sticky 多屏滚动**：`min-height:300vh` 容器 + 子元素 `position:sticky;top:0;height:100vh`，让每个数字独占一屏滚动区间
+- **滚动进度映射**：`p = -rect.top / (offsetHeight - innerHeight)`，0~1 归一化
+- **错峰分片**：`seg = p * N - i` 让 N 个元素各自在 1/N 区间依次出现
+- **will-change**：滚动动画元素加 `will-change:transform,opacity` 防卡顿
+- **颜色主题**：南孚金 `#FFCD00` → 建行蓝 `#2E6FD2`/`#4D94FF` 直接替换，CSS 变量化更佳
+
+### 4. 适用场景（领导汇报数据页）
+
+- 核心增长率（+144.8% / +87.4%）→ 超大数字右→左滑入
+- 关键排名跃升（排7→5 / 排9→5）→ 同上
+- 成就亮点（结算第1 / 40户）→ 同上
+- 穿梭元素替换为银行相关视觉：能量环 / 电池 / 光点
+
+### 5. 验收要点
+
+- 滚动到数字区：数字应从右侧滑入并停在左侧，opacity 随进度渐变
+- 穿梭元素应旋转 + 弧线移动，不遮挡数字可读性
+- 检查 300vh 容器滚动到底后最后一个数字完整显示
+- 窄屏下超大数字不溢出（clamp 上限控制）
