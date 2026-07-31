@@ -397,3 +397,147 @@ CSS 穿梭环（银行版用蓝色能量环替代电池）：
 - 穿梭元素应旋转 + 弧线移动，不遮挡数字可读性
 - 检查 300vh 容器滚动到底后最后一个数字完整显示
 - 窄屏下超大数字不溢出（clamp 上限控制）
+
+## 特效库全集（nanfu.global 完整逆向沉淀）
+
+以下所有特效均从南孚国际官网逆向验证，可直接套用到银行汇报。统一用 CSS 变量换色（`--acc` 主色、`--acc2` 亮色）。
+
+### 特效 1 · 开场动画（Hero）
+
+真站：视频背景 + bannerCv 帧动画 + 标题行依次滑入。无视频素材时用渐变 + CSS 模拟。
+
+```css
+.hero h1 .line{display:block;overflow:hidden}
+.hero h1 .line span{display:inline-block;transform:translateY(110%);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
+.hero.loaded h1 .line:nth-child(1) span{transform:translateY(0)}
+.hero.loaded h1 .line:nth-child(2) span{transform:translateY(0);transition-delay:.15s}
+/* 背景渐变淡入 + KPI 延迟浮现 */
+.hero-bg{opacity:0;transition:opacity 1.2s ease .3s}
+.hero .kpis{opacity:0;transform:translateY(40px);transition:all 1.2s ease .8s}
+```
+```js
+setTimeout(function(){ document.getElementById('hero').classList.add('loaded'); }, 400);
+```
+
+### 特效 2 · 粒子背景
+
+固定 canvas 粒子层（z-index 0，内容 z-index 1）：
+```js
+var cv = document.getElementById('particles'), ctx = cv.getContext('2d');
+var W, H, ps = [];
+function resize(){ W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+for(var i = 0; i < 45; i++) ps.push({ x: Math.random()*W, y: Math.random()*H, r: Math.random()*2.5+.5, dx: (Math.random()-.5)*.4, dy: (Math.random()-.5)*.4 });
+(function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(var i = 0; i < ps.length; i++){
+    var p = ps[i]; p.x += p.dx; p.y += p.dy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(' + RGB + ',' + (Math.random()*.3+.08) + ')'; ctx.fill();
+  }
+  requestAnimationFrame(draw);
+})();
+```
+
+### 特效 3 · 磨砂导航
+
+```css
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 6vw;background:transparent;transition:all .4s}
+nav.scrolled{background:rgba(底色,.85);backdrop-filter:blur(18px);padding:14px 6vw;border-bottom:1px solid rgba(255,255,255,.06)}
+```
+```js
+window.addEventListener('scroll', function(){ nav.classList.toggle('scrolled', window.scrollY > 60); });
+```
+
+### 特效 4 · 场景底色交替
+
+```css
+.s-dark{background:#070b14}
+.s-deep{background:linear-gradient(180deg,#070b14,#0a1220)}
+.s-glow{background:radial-gradient(ellipse at 80% 20%,rgba(主色,.12),transparent 60%),#070b14}
+```
+每屏换一个底色，滚动时产生节奏感。
+
+### 特效 5 · 滚动入场（IO + 错峰）
+
+```css
+.rv{opacity:0;transform:translateY(50px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.rv.in{opacity:1;transform:translateY(0)}
+.rv:nth-child(2){transition-delay:.12s}.rv:nth-child(3){transition-delay:.24s}.rv:nth-child(4){transition-delay:.36s}
+```
+```js
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:.2});
+document.querySelectorAll('.rv,.diag,.act').forEach(function(el){ io.observe(el); });
+```
+
+### 特效 6 · 横向时间线（滚动横向平移）
+
+真站：`group process` 宽 8496px，滚动时 `translateX(-6488px)` 右到左扫过，年份 f-90 超大。
+
+```css
+.process-scene{position:relative;height:300vh}
+.process-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center}
+.process{width:260%;display:flex;align-items:center;gap:5vw;will-change:transform;padding:0 8vw}
+.tl-card .ty{font-size:clamp(44px,6vw,90px);font-weight:800;background:linear-gradient(135deg,主色,亮色);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+```
+```js
+(function(){
+  pt += (ptarget - pt) * .06;
+  var maxShift = track.scrollWidth - window.innerWidth;
+  track.style.transform = 'translateX(' + (-pt * maxShift) + 'px)';
+  requestAnimationFrame(arguments.callee);
+})();
+```
+
+### 特效 7 · 帧序列动画检测与复刻
+
+真站 bannerCv/batteryCv 是预渲染 PNG 帧序列（非实时绘制）：
+```html
+<canvas class="bannerCv" data-path="/templates/assets/home/bannerFm/" data-count="120"></canvas>
+```
+```js
+this.imagesPath = canvas.getAttribute("data-path");
+this.frameCount = canvas.getAttribute("data-count");
+// 滚动驱动帧：cur = floor(progress * frameCount)，逐帧 drawImage
+```
+**检测要点**：复刻任何 canvas 动画前，先查 `data-path`/`data-count` 属性——真站常用帧序列而非实时绘制。帧素材可能受 WAF 保护（返回 JS 挑战页），需与用户确认复刻深度。
+
+### 特效 8 · 超大字体体系
+
+真站用 `f-300/f-140/f-120/f-90/f-80/f-60` 等级 + `word_b`(粗) `wc`(白) `mc/txt-color`(渐变)。
+
+| 级别 | 用途 | 字号 |
+|------|------|------|
+| f-300 | 核心增长数字（+345%） | `clamp(90px,18vw,300px)` |
+| f-120 | 板块大标题（Our Products） | `clamp(44px,7vw,120px)` |
+| f-90 | 时间线年份 | `clamp(44px,6vw,90px)` |
+| f-60 | Hero 主标题 | `clamp(40px,6vw,96px)` |
+
+统一金色渐变：`linear-gradient(135deg,#FFCD00,#FFE47A)`；银行版换 `linear-gradient(135deg,#4D94FF,#2E6FD2)`。
+
+### 特效 9 · 卡片/元素微交互
+
+```css
+.card{transition:all .4s}
+.card:hover{transform:translateY(-8px);border-color:rgba(主色,.35);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+```
+
+### 特效 10 · 图表动效
+
+- `animationDuration: 1000` + `animationEasing: 'bounceOut'` 数据从 0 生长
+- 深色主题图表：轴 `rgba(255,255,255,.1)`、标签 `#94a2b5`、分割线虚线
+- 正负发散条（中收构成）：收入正值 + 费用负值
+- 图表容器随 `.rv.in` 触发 ECharts `resize()` 确保尺寸正确
+
+### 综合使用建议（银行汇报）
+
+```
+Hero开场(特效1+2+3) → 总体结论(特效5+10)
+→ 超大数字区(特效8+右往左+穿梭环) → 各主题深潜(特效5+10+四层诊断)
+→ 横向时间线(特效6) → 行动闭环(特效5) → 结尾(特效1)
+```
+
+深色底(特效4)贯穿，粒子(特效2)全局，导航(特效3)常驻。
