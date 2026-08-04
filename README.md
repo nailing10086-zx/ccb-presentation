@@ -90,6 +90,20 @@
 感谢开源生态：ECharts · xlsx · mammoth · Node.js · Git。
 
 
+## 动效参考与校验
+
+本次补充不只更新规则，还保留了一个可直接打开的滚动叙事参考页：
+
+- `examples/codex-motion-intro.html`：单文件 HTML，包含开场过渡、sticky 舞台、滚动驱动的横向轨道、垂直居中和响应式布局。
+- `scripts/validate-single-html.mjs`：检查 HTML 根节点、内联脚本语法；加上 `--motion` 时，额外检查 sticky 舞台、整屏轨道、`min-height: 100vh` 和横向轨道结构。
+
+校验命令：
+
+```bash
+node scripts/validate-single-html.mjs examples/codex-motion-intro.html --motion
+```
+
+参考页用于复用滚动叙事和动效结构，不替代建行经营数据模板；实际项目仍需保留数据口径、驾驶舱与汇报模式的验收要求。
 ## License
 
 
